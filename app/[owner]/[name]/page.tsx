@@ -1,5 +1,5 @@
-import { notFound } from "next/navigation"
-import { RepoSpotlight } from "@/components/repo-spotlight"
+import { RepoSpotlight } from "@/components/repo-spotlight";
+import { notFound } from "next/navigation";
 
 // Mock data for repositories (same as in feed.tsx)
 const mockRepos = [
@@ -17,7 +17,15 @@ const mockRepos = [
     stars: 112000,
     forks: 24500,
     updated_at: "2023-05-01T12:00:00Z",
-    topics: ["react", "nextjs", "javascript", "typescript", "framework", "ssr", "static-site-generator"],
+    topics: [
+      "react",
+      "nextjs",
+      "javascript",
+      "typescript",
+      "framework",
+      "ssr",
+      "static-site-generator",
+    ],
     fullDescription: `
       Next.js gives you the best developer experience with all the features you need for production: hybrid static & server rendering, TypeScript support, smart bundling, route pre-fetching, and more. No config needed.
       
@@ -64,8 +72,10 @@ const mockRepos = [
       login: "facebook",
       avatar_url: "/facebook-logo.png",
     },
-    description: "A declarative, efficient, and flexible JavaScript library for building user interfaces.",
-    aiSummary: "The most popular JavaScript library for building interactive UIs with a component-based architecture.",
+    description:
+      "A declarative, efficient, and flexible JavaScript library for building user interfaces.",
+    aiSummary:
+      "The most popular JavaScript library for building interactive UIs with a component-based architecture.",
     language: "JavaScript",
     stars: 210000,
     forks: 43000,
@@ -81,8 +91,10 @@ const mockRepos = [
       - Learn Once, Write Anywhere: We don't make assumptions about the rest of your technology stack, so you can develop new features in React without rewriting existing code. React can also render on the server using Node and power mobile apps using React Native.
     `,
     aiAnalysis: {
-      whatItIs: "React is a JavaScript library for building user interfaces with a component-based architecture.",
-      whoItsFor: "Frontend developers building interactive web applications and user interfaces.",
+      whatItIs:
+        "React is a JavaScript library for building user interfaces with a component-based architecture.",
+      whoItsFor:
+        "Frontend developers building interactive web applications and user interfaces.",
       prosAndCons: {
         pros: [
           "Component-based architecture promotes reusability",
@@ -160,7 +172,8 @@ const mockRepos = [
       avatar_url: "/langchain-logo.png",
     },
     description: "Building applications with LLMs through composability",
-    aiSummary: "Framework for developing applications powered by language models with components for LLM integrations.",
+    aiSummary:
+      "Framework for developing applications powered by language models with components for LLM integrations.",
     language: "TypeScript",
     stars: 65000,
     forks: 9200,
@@ -210,13 +223,22 @@ const mockRepos = [
       login: "shadcn",
       avatar_url: "/abstract-geometric-logo.png",
     },
-    description: "Beautifully designed components built with Radix UI and Tailwind CSS.",
-    aiSummary: "Accessible and customizable React components that you can copy and paste into your apps.",
+    description:
+      "Beautifully designed components built with Radix UI and Tailwind CSS.",
+    aiSummary:
+      "Accessible and customizable React components that you can copy and paste into your apps.",
     language: "TypeScript",
     stars: 45000,
     forks: 2800,
     updated_at: "2023-04-29T14:20:00Z",
-    topics: ["react", "components", "ui", "tailwindcss", "radix-ui", "design-system"],
+    topics: [
+      "react",
+      "components",
+      "ui",
+      "tailwindcss",
+      "radix-ui",
+      "design-system",
+    ],
     fullDescription: `
       shadcn/ui is a collection of re-usable components that you can copy and paste into your apps.
       
@@ -253,14 +275,20 @@ const mockRepos = [
     },
     relatedRepos: ["1", "2", "3"],
   },
-]
+];
 
-export default function RepoPage({ params }: { params: { id: string } }) {
-  const repo = mockRepos.find((r) => r.id === params.id)
+export default function RepoPage({
+  params,
+}: {
+  params: { owner: string; name: string };
+}) {
+  const repo = mockRepos.find(
+    (r) => r.owner.login === params.owner && r.name === params.name
+  );
 
   if (!repo) {
-    notFound()
+    notFound();
   }
 
-  return <RepoSpotlight repo={repo} />
+  return <RepoSpotlight repo={repo} />;
 }
