@@ -1,5 +1,5 @@
-import { CodeFeed } from "@/components/code-feed"
+import { CodeFeed } from "@/components/code-feed";
 
 export default function Home() {
-  return <CodeFeed />
+  return <CodeFeed />;
 }

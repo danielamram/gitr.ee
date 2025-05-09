@@ -1,14 +1,15 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { summarizeRepo } from "@/lib/ai/summarizeRepo";
+import { motion } from "framer-motion";
 import {
   BarChart,
   Brain,
+  Clock,
   Code,
   Cpu,
   Database,
@@ -18,16 +19,93 @@ import {
   LineChart,
   RefreshCw,
   Sparkles,
-  Zap,
-  Clock,
-  ArrowRight,
-} from "lucide-react"
-import { motion } from "framer-motion"
-import Link from "next/link"
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { RepoCard } from "../repo-card";
+
+// Mock GitHub repository data
+const mockRepos = [
+  {
+    id: "1",
+    name: "next.js",
+    owner: {
+      login: "vercel",
+      avatar_url: "https://avatars.githubusercontent.com/u/14985020?v=4",
+    },
+    description: "The React Framework for the Web",
+    aiSummary: "", // To be populated by AI
+    language: "JavaScript",
+    stars: 112000,
+    forks: 24500,
+    updated_at: "2023-08-15T14:23:45Z",
+    topics: ["react", "nextjs", "framework", "javascript", "vercel"],
+  },
+  {
+    id: "2",
+    name: "tailwindcss",
+    owner: {
+      login: "tailwindlabs",
+      avatar_url: "https://avatars.githubusercontent.com/u/67109815?v=4",
+    },
+    description: "A utility-first CSS framework for rapid UI development",
+    aiSummary: "", // To be populated by AI
+    language: "CSS",
+    stars: 71300,
+    forks: 3700,
+    updated_at: "2023-08-14T09:12:33Z",
+    topics: ["css", "framework", "utility", "responsive"],
+  },
+  {
+    id: "3",
+    name: "supabase",
+    owner: {
+      login: "supabase",
+      avatar_url: "https://avatars.githubusercontent.com/u/54469796?v=4",
+    },
+    description: "The open source Firebase alternative",
+    aiSummary: "", // To be populated by AI
+    language: "TypeScript",
+    stars: 58400,
+    forks: 4100,
+    updated_at: "2023-08-13T18:45:22Z",
+    topics: ["database", "firebase", "postgresql", "backend", "auth"],
+  },
+];
 
 export function PersonalizedFeed() {
-  const [isRefreshing, setIsRefreshing] = useState(false)
-  const [activeTab, setActiveTab] = useState("insights")
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState("insights");
+  const [repositories, setRepositories] = useState(mockRepos);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch AI summaries for repositories
+  useEffect(() => {
+    const generateSummaries = async () => {
+      try {
+        const updatedRepos = await Promise.all(
+          repositories.map(async (repo) => {
+            if (!repo.aiSummary) {
+              const summary = await summarizeRepo(repo);
+              return { ...repo, aiSummary: summary };
+            }
+            return repo;
+          })
+        );
+
+        setRepositories(updatedRepos);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error generating summaries:", error);
+        setLoading(false);
+      }
+    };
+
+    if (repositories.some((repo) => !repo.aiSummary)) {
+      generateSummaries();
+    } else {
+      setLoading(false);
+    }
+  }, [repositories]);
 
   // Mock data for AI insights
   const insights = {
@@ -104,7 +182,8 @@ export function PersonalizedFeed() {
       {
         id: "2",
         title: "TypeScript Discriminated Unions",
-        description: "Master type-safe state handling with discriminated unions",
+        description:
+          "Master type-safe state handling with discriminated unions",
         difficulty: "Advanced",
         estimatedTime: "1.5 hours",
       },
@@ -116,15 +195,15 @@ export function PersonalizedFeed() {
         estimatedTime: "1 hour",
       },
     ],
-  }
+  };
 
   const handleRefresh = () => {
-    setIsRefreshing(true)
+    setIsRefreshing(true);
     // Simulate API call to refresh insights
     setTimeout(() => {
-      setIsRefreshing(false)
-    }, 1500)
-  }
+      setIsRefreshing(false);
+    }, 1500);
+  };
 
   return (
     <Card className="border border-border/40">
@@ -133,7 +212,12 @@ export function PersonalizedFeed() {
           <Fingerprint className="h-5 w-5 mr-2 text-purple-500" />
           Your Personalized Insights
         </CardTitle>
-        <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+        >
           {isRefreshing ? (
             <>
               <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -148,7 +232,12 @@ export function PersonalizedFeed() {
         </Button>
       </CardHeader>
       <CardContent className="p-0">
-        <Tabs defaultValue="insights" className="w-full" onValueChange={setActiveTab} value={activeTab}>
+        <Tabs
+          defaultValue="insights"
+          className="w-full"
+          onValueChange={setActiveTab}
+          value={activeTab}
+        >
           <TabsList className="w-full rounded-none border-b">
             <TabsTrigger value="insights" className="flex-1">
               <Sparkles className="h-4 w-4 mr-2" />
@@ -158,9 +247,9 @@ export function PersonalizedFeed() {
               <Flame className="h-4 w-4 mr-2" />
               Trending
             </TabsTrigger>
-            <TabsTrigger value="recommendations" className="flex-1">
-              <Zap className="h-4 w-4 mr-2" />
-              For You
+            <TabsTrigger value="repositories" className="flex-1">
+              <Code className="h-4 w-4 mr-2" />
+              Repositories
             </TabsTrigger>
           </TabsList>
 
@@ -171,7 +260,8 @@ export function PersonalizedFeed() {
                 Your Interest Profile
               </h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Based on your activity, we've identified these as your primary interests:
+                Based on your activity, we've identified these as your primary
+                interests:
               </p>
 
               <div className="space-y-3">
@@ -179,7 +269,9 @@ export function PersonalizedFeed() {
                   <div key={index} className="space-y-1">
                     <div className="flex items-center justify-between text-sm">
                       <span>{interest.name}</span>
-                      <span className="text-muted-foreground">{interest.score}%</span>
+                      <span className="text-muted-foreground">
+                        {interest.score}%
+                      </span>
                     </div>
                     <div className="w-full bg-muted rounded-full h-2">
                       <motion.div
@@ -200,7 +292,8 @@ export function PersonalizedFeed() {
                 Learning Path
               </h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Recommended topics to explore based on your interests and current skill level:
+                Recommended topics to explore based on your interests and
+                current skill level:
               </p>
 
               <div className="space-y-3">
@@ -215,7 +308,9 @@ export function PersonalizedFeed() {
                     <div className="flex justify-between items-start">
                       <div>
                         <h4 className="font-medium">{item.title}</h4>
-                        <p className="text-sm text-muted-foreground">{item.description}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {item.description}
+                        </p>
                       </div>
                       <Badge
                         variant="outline"
@@ -223,8 +318,8 @@ export function PersonalizedFeed() {
                           item.difficulty === "Beginner"
                             ? "bg-green-500/10 text-green-500"
                             : item.difficulty === "Intermediate"
-                              ? "bg-blue-500/10 text-blue-500"
-                              : "bg-purple-500/10 text-purple-500"
+                            ? "bg-blue-500/10 text-blue-500"
+                            : "bg-purple-500/10 text-purple-500"
                         }
                       >
                         {item.difficulty}
@@ -243,7 +338,8 @@ export function PersonalizedFeed() {
           <TabsContent value="trending" className="p-4">
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                These topics are gaining significant attention in the developer community:
+                These topics are gaining significant attention in the developer
+                community:
               </p>
 
               <div className="space-y-4">
@@ -258,9 +354,14 @@ export function PersonalizedFeed() {
                     <div className="flex justify-between items-start">
                       <div>
                         <h4 className="font-medium">{trend.name}</h4>
-                        <p className="text-sm text-muted-foreground">{trend.description}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {trend.description}
+                        </p>
                       </div>
-                      <Badge variant="outline" className="bg-green-500/10 text-green-500">
+                      <Badge
+                        variant="outline"
+                        className="bg-green-500/10 text-green-500"
+                      >
                         {trend.growth}
                       </Badge>
                     </div>
@@ -279,7 +380,8 @@ export function PersonalizedFeed() {
                   Technology Adoption Trends
                 </h4>
                 <p className="text-sm text-muted-foreground">
-                  Based on repository creation and star growth, these technologies are seeing rapid adoption:
+                  Based on repository creation and star growth, these
+                  technologies are seeing rapid adoption:
                 </p>
                 <div className="flex flex-wrap gap-2 mt-3">
                   <Badge variant="outline" className="flex items-center">
@@ -303,65 +405,28 @@ export function PersonalizedFeed() {
             </div>
           </TabsContent>
 
-          <TabsContent value="recommendations" className="p-4">
+          <TabsContent value="repositories" className="p-4">
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Content recommendations tailored to your interests and skill level:
+              <p className="text-sm text-muted-foreground mb-4">
+                Repositories tailored to your interests with AI-generated
+                summaries:
               </p>
 
-              <div className="space-y-3">
-                {insights.recommendations.map((item, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="border rounded-md p-3"
-                  >
-                    <div className="flex items-start gap-3">
-                      <Avatar className="h-8 w-8 rounded-md">
-                        <AvatarImage src={item.author.avatar || "/placeholder.svg"} alt={item.author.name} />
-                        <AvatarFallback className="rounded-md">
-                          {item.author.name.substring(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start">
-                          <h4 className="font-medium">{item.title}</h4>
-                          <Badge
-                            variant="outline"
-                            className={
-                              item.relevance === "High"
-                                ? "bg-green-500/10 text-green-500"
-                                : "bg-blue-500/10 text-blue-500"
-                            }
-                          >
-                            {item.relevance}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center mt-1">
-                          <span className="text-sm text-muted-foreground">{item.author.name}</span>
-                          <span className="mx-2 text-muted-foreground">•</span>
-                          <Badge variant="outline" className="text-xs">
-                            {item.type}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-
-              <Button variant="outline" className="w-full" asChild>
-                <Link href="/recommendations">
-                  View All Recommendations
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Link>
-              </Button>
+              {loading ? (
+                <div className="flex justify-center py-6">
+                  <RefreshCw className="h-10 w-10 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {repositories.map((repo) => (
+                    <RepoCard key={repo.id} repo={repo} />
+                  ))}
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>
       </CardContent>
     </Card>
-  )
+  );
 }
