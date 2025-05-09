@@ -25,6 +25,12 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const { theme, setTheme } = useTheme();
   const { user, signInWithGitHub, signOut, loading } = useAuth();
+  const [mounted, setMounted] = useState(false);
+
+  // Mount component effect
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Add scroll detection for header styling
   useEffect(() => {
@@ -110,10 +116,14 @@ export function Header() {
             aria-label="Toggle theme"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           >
-            {theme === "dark" ? (
-              <Sun className="h-5 w-5" />
+            {mounted ? (
+              theme === "dark" ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )
             ) : (
-              <Moon className="h-5 w-5" />
+              <span className="h-5 w-5" />
             )}
           </Button>
 

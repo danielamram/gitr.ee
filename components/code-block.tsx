@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import Prism from "prismjs";
 import "prismjs/components/prism-bash";
 import "prismjs/components/prism-css";
@@ -11,7 +12,9 @@ import "prismjs/components/prism-scss";
 import "prismjs/components/prism-tsx";
 import "prismjs/components/prism-typescript";
 import "prismjs/components/prism-yaml";
-import { useEffect } from "react";
+import "prismjs/plugins/autoloader/prism-autoloader";
+import "prismjs/prism";
+import { useEffect, useState } from "react";
 
 interface CodeBlockProps {
   code: string;
@@ -19,9 +22,19 @@ interface CodeBlockProps {
 }
 
 export function CodeBlock({ code, language }: CodeBlockProps) {
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
-    Prism.highlightAll();
-  }, [code, language]);
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      Prism.highlightAll();
+    }
+  }, [code, language, mounted]);
+
+  if (!mounted) return null;
 
   // Map language to Prism supported language
   const getPrismLanguage = (lang: string) => {
@@ -45,9 +58,14 @@ export function CodeBlock({ code, language }: CodeBlockProps) {
     return languageMap[lang.toLowerCase()] || lang.toLowerCase();
   };
 
+  const prismLanguage = getPrismLanguage(language);
+
   return (
-    <pre className="p-4 overflow-x-auto text-sm" style={{ margin: 0 }}>
-      <code className={`language-${getPrismLanguage(language)}`}>{code}</code>
+    <pre
+      className={cn("p-4 overflow-x-auto text-xs rounded-md bg-muted")}
+      style={{ margin: 0 }}
+    >
+      <code className={`language-${prismLanguage}`}>{code}</code>
     </pre>
   );
 }
