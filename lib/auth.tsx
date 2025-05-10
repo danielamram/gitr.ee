@@ -32,6 +32,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      // if (session) {
+      //   console.log("Session data:", session);
+      //   const { user, provider_token } = session;
+      //   const userId = user?.id;
+      //   const githubAccessToken = provider_token;
+      //   if (userId && githubAccessToken) {
+      //     // Fetch and store GitHub data (do not block redirect)
+      //     fetchAndStoreAllGithubData(userId, githubAccessToken).catch((err) => {
+      //       // Optionally log error
+      //       console.error("GitHub data fetch error:", err);
+      //     });
+      //   }
+      // }
+
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);

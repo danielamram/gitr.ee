@@ -9,6 +9,111 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      github_activity: {
+        Row: {
+          action: string
+          created_at: string
+          raw: Json | null
+          repo: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at: string
+          raw?: Json | null
+          repo?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          raw?: Json | null
+          repo?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      github_followers: {
+        Row: {
+          follower_user_id: number
+          follower_user_name: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          follower_user_id: number
+          follower_user_name: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          follower_user_id?: number
+          follower_user_name?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      github_follows: {
+        Row: {
+          followed_user_id: number
+          followed_user_name: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          followed_user_id: number
+          followed_user_name: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          followed_user_id?: number
+          followed_user_name?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      github_languages: {
+        Row: {
+          frequency: number
+          language: string
+          user_id: string
+        }
+        Insert: {
+          frequency: number
+          language: string
+          user_id: string
+        }
+        Update: {
+          frequency?: number
+          language?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      github_stars: {
+        Row: {
+          repo_id: number
+          repo_name: string
+          repo_url: string
+          user_id: string
+        }
+        Insert: {
+          repo_id: number
+          repo_name: string
+          repo_url: string
+          user_id: string
+        }
+        Update: {
+          repo_id?: number
+          repo_name?: string
+          repo_url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null

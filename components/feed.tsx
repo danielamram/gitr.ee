@@ -1,12 +1,18 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { RepoCard, type RepoCardProps } from "@/components/repo-card"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Sparkles, Clock, Flame, ChevronLeft, ChevronRight } from "lucide-react"
-import { motion, AnimatePresence, type PanInfo } from "framer-motion"
-import { useMobile } from "@/hooks/use-mobile"
+import { RepoCard, type RepoCardProps } from "@/components/repo-card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useMobile } from "@/hooks/use-mobile";
+import { AnimatePresence, motion, type PanInfo } from "framer-motion";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Flame,
+  Sparkles,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 
 // Mock data for repositories
 const mockRepos: RepoCardProps[] = [
@@ -24,7 +30,15 @@ const mockRepos: RepoCardProps[] = [
     stars: 112000,
     forks: 24500,
     updated_at: "2023-05-01T12:00:00Z",
-    topics: ["react", "nextjs", "javascript", "typescript", "framework", "ssr", "static-site-generator"],
+    topics: [
+      "react",
+      "nextjs",
+      "javascript",
+      "typescript",
+      "framework",
+      "ssr",
+      "static-site-generator",
+    ],
   },
   {
     id: "2",
@@ -33,8 +47,10 @@ const mockRepos: RepoCardProps[] = [
       login: "facebook",
       avatar_url: "/facebook-logo.png",
     },
-    description: "A declarative, efficient, and flexible JavaScript library for building user interfaces.",
-    aiSummary: "The most popular JavaScript library for building interactive UIs with a component-based architecture.",
+    description:
+      "A declarative, efficient, and flexible JavaScript library for building user interfaces.",
+    aiSummary:
+      "The most popular JavaScript library for building interactive UIs with a component-based architecture.",
     language: "JavaScript",
     stars: 210000,
     forks: 43000,
@@ -65,7 +81,8 @@ const mockRepos: RepoCardProps[] = [
       avatar_url: "/langchain-logo.png",
     },
     description: "Building applications with LLMs through composability",
-    aiSummary: "Framework for developing applications powered by language models with components for LLM integrations.",
+    aiSummary:
+      "Framework for developing applications powered by language models with components for LLM integrations.",
     language: "TypeScript",
     stars: 65000,
     forks: 9200,
@@ -79,91 +96,107 @@ const mockRepos: RepoCardProps[] = [
       login: "shadcn",
       avatar_url: "/abstract-geometric-logo.png",
     },
-    description: "Beautifully designed components built with Radix UI and Tailwind CSS.",
-    aiSummary: "Accessible and customizable React components that you can copy and paste into your apps.",
+    description:
+      "Beautifully designed components built with Radix UI and Tailwind CSS.",
+    aiSummary:
+      "Accessible and customizable React components that you can copy and paste into your apps.",
     language: "TypeScript",
     stars: 45000,
     forks: 2800,
     updated_at: "2023-04-29T14:20:00Z",
-    topics: ["react", "components", "ui", "tailwindcss", "radix-ui", "design-system"],
+    topics: [
+      "react",
+      "components",
+      "ui",
+      "tailwindcss",
+      "radix-ui",
+      "design-system",
+    ],
   },
-]
+];
 
 export function Feed() {
-  const [activeTab, setActiveTab] = useState("for-you")
-  const [isLoading, setIsLoading] = useState(false)
-  const [viewMode, setViewMode] = useState<"list" | "card">("list")
-  const [currentCardIndex, setCurrentCardIndex] = useState(0)
-  const [direction, setDirection] = useState(0)
-  const isMobile = useMobile()
+  const [activeTab, setActiveTab] = useState("for-you");
+  const [isLoading, setIsLoading] = useState(false);
+  const [viewMode, setViewMode] = useState<"list" | "card">("list");
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
+  const isMobile = useMobile();
 
   // Get the appropriate repos based on the active tab
   const getReposForTab = () => {
     switch (activeTab) {
       case "for-you":
-        return mockRepos
+        return mockRepos;
       case "trending":
-        return [...mockRepos].reverse()
+        return [...mockRepos].reverse();
       case "recent":
-        return [...mockRepos].sort(() => Math.random() - 0.5)
+        return [...mockRepos].sort(() => Math.random() - 0.5);
       default:
-        return mockRepos
+        return mockRepos;
     }
-  }
+  };
 
-  const repos = getReposForTab()
+  const repos = getReposForTab();
 
   const loadMoreRepos = () => {
-    setIsLoading(true)
+    setIsLoading(true);
     // Simulate loading more repositories
     setTimeout(() => {
-      setIsLoading(false)
-    }, 1500)
-  }
+      setIsLoading(false);
+    }, 1500);
+  };
 
-  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    const threshold = 100
+  const handleDragEnd = (
+    event: MouseEvent | TouchEvent | PointerEvent,
+    info: PanInfo
+  ) => {
+    const threshold = 100;
     if (info.offset.x < -threshold) {
       // Swiped left
       if (currentCardIndex < repos.length - 1) {
-        setDirection(1)
-        setCurrentCardIndex(currentCardIndex + 1)
+        setDirection(1);
+        setCurrentCardIndex(currentCardIndex + 1);
       }
     } else if (info.offset.x > threshold) {
       // Swiped right
       if (currentCardIndex > 0) {
-        setDirection(-1)
-        setCurrentCardIndex(currentCardIndex - 1)
+        setDirection(-1);
+        setCurrentCardIndex(currentCardIndex - 1);
       }
     }
-  }
+  };
 
   const nextCard = () => {
     if (currentCardIndex < repos.length - 1) {
-      setDirection(1)
-      setCurrentCardIndex(currentCardIndex + 1)
+      setDirection(1);
+      setCurrentCardIndex(currentCardIndex + 1);
     }
-  }
+  };
 
   const prevCard = () => {
     if (currentCardIndex > 0) {
-      setDirection(-1)
-      setCurrentCardIndex(currentCardIndex - 1)
+      setDirection(-1);
+      setCurrentCardIndex(currentCardIndex - 1);
     }
-  }
+  };
 
   // Auto-switch to card view on mobile
   useEffect(() => {
     if (isMobile) {
-      setViewMode("card")
+      setViewMode("card");
     } else {
-      setViewMode("list")
+      setViewMode("list");
     }
-  }, [isMobile])
+  }, [isMobile]);
 
   return (
     <div className="max-w-3xl mx-auto">
-      <Tabs defaultValue="for-you" className="mb-4" onValueChange={setActiveTab}>
+      <Tabs
+        defaultValue="for-you"
+        className="mb-4"
+        onValueChange={setActiveTab}
+      >
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="for-you" className="flex items-center">
             <Sparkles className="h-4 w-4 mr-2" />
@@ -217,7 +250,11 @@ export function Feed() {
                   custom={direction}
                   initial={{ opacity: 0, x: direction > 0 ? 300 : -300 }}
                   animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: direction < 0 ? 300 : -300, scale: 0.9 }}
+                  exit={{
+                    opacity: 0,
+                    x: direction < 0 ? 300 : -300,
+                    scale: 0.9,
+                  }}
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   className="absolute inset-0 flex items-center justify-center"
                   drag="x"
@@ -281,7 +318,11 @@ export function Feed() {
                   custom={direction}
                   initial={{ opacity: 0, x: direction > 0 ? 300 : -300 }}
                   animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: direction < 0 ? 300 : -300, scale: 0.9 }}
+                  exit={{
+                    opacity: 0,
+                    x: direction < 0 ? 300 : -300,
+                    scale: 0.9,
+                  }}
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   className="absolute inset-0 flex items-center justify-center"
                   drag="x"
@@ -345,7 +386,11 @@ export function Feed() {
                   custom={direction}
                   initial={{ opacity: 0, x: direction > 0 ? 300 : -300 }}
                   animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: direction < 0 ? 300 : -300, scale: 0.9 }}
+                  exit={{
+                    opacity: 0,
+                    x: direction < 0 ? 300 : -300,
+                    scale: 0.9,
+                  }}
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   className="absolute inset-0 flex items-center justify-center"
                   drag="x"
@@ -403,5 +448,5 @@ export function Feed() {
         </div>
       )}
     </div>
-  )
+  );
 }
