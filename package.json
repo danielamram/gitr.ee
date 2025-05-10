@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "gen:supabase-types": "supabase gen types typescript --project-id \"qgktztldlucwgrodmpdo\" --schema public > lib/types/database.types.ts"
   },
   "dependencies": {
     "@ai-sdk/amazon-bedrock": "^2.2.9",
