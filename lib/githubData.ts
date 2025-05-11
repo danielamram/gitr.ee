@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/client";
+import { v4 as uuidv4 } from "uuid";
 
 const supabase = createClient();
 
@@ -163,6 +164,78 @@ export async function fetchAndStoreGithubActivity(
   }
 }
 
+// Fetch starred repos by followed users
+export async function fetchAndStoreFollowedUsersStars(
+  currentUserId: string,
+  accessToken: string,
+  limitFollowedUsers: number = 20 // limit for performance, can be adjusted
+) {
+  const SPECIAL_UUID = "00000000-0000-0000-0000-000000000000";
+  // 1. Get followed users from GitHub
+  let page = 1;
+  let hasMore = true;
+  let followedUsers: any[] = [];
+  while (hasMore && followedUsers.length < limitFollowedUsers) {
+    const follows = await githubFetch(
+      `/user/following?per_page=100&page=${page}`,
+      accessToken
+    );
+    if (!Array.isArray(follows) || follows.length === 0) break;
+    followedUsers = followedUsers.concat(follows);
+    hasMore =
+      follows.length === 100 && followedUsers.length < limitFollowedUsers;
+    page++;
+  }
+  followedUsers = followedUsers.slice(0, limitFollowedUsers);
+
+  // 2. For each followed user, fetch their starred repos
+  for (const user of followedUsers) {
+    const uuid = uuidv4();
+    try {
+      let starsPage = 1;
+      let starsHasMore = true;
+      while (starsHasMore) {
+        const stars = await githubFetch(
+          `/users/${user.login}/starred?per_page=100&page=${starsPage}`,
+          accessToken
+        );
+        if (!Array.isArray(stars) || stars.length === 0) break;
+        const upserts = stars.map((repo: any) => ({
+          user_id: uuid,
+          github_user_id: user.id,
+          github_username: user.login,
+          repo_id: repo.id,
+          repo_name: repo.full_name,
+          repo_url: repo.html_url,
+        }));
+        if (upserts.length > 0) {
+          await supabase.from("github_stars").upsert(upserts, {
+            onConflict: "user_id,repo_id",
+          });
+        }
+        starsHasMore = stars.length === 100;
+        starsPage++;
+      }
+    } catch (err) {
+      // Fallback: skip this user on error
+      // TODO: log error for analytics
+      continue;
+    }
+  }
+  // TODO: log feature usage for analytics
+}
+
+// Merge routine: Call this when a followed user signs up to update their stars
+export async function mergeFollowedStarsToUser(
+  userId: string,
+  githubUserId: number
+) {
+  await supabase
+    .from("github_stars")
+    .update({ user_id: userId })
+    .eq("github_user_id", githubUserId);
+}
+
 // Main function to fetch and store all data
 export async function fetchAndStoreAllGithubData(
   userId: string,
@@ -173,6 +246,7 @@ export async function fetchAndStoreAllGithubData(
     fetchAndStoreGithubFollows(userId, accessToken),
     fetchAndStoreGithubFollowers(userId, accessToken),
     fetchAndStoreGithubLanguages(userId, accessToken),
+    fetchAndStoreFollowedUsersStars(userId, accessToken),
     // TODO: update to use the user's github username
     // fetchAndStoreGithubActivity(userId, "danielamram", accessToken),
   ]);
